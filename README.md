@@ -1,5 +1,5 @@
 # game-group-project
 
-Group members:
-Zain Burki (Repository owner)
-Sarah Schulman
+# Group members:
+- Zain Burki (Repository owner)
+- Sarah Schulman
