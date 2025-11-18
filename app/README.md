@@ -1,3 +1,3 @@
-# app
+# Serious Game Project
 
-A new Flutter project.
+Check out README.md in the parent folder for author information.
