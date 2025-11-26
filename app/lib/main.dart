@@ -24,9 +24,10 @@ class Home extends StatelessWidget {
   @override
     Widget build(BuildContext context) {
       return Scaffold(
+        backgroundColor: const Color.fromARGB(255, 249, 249, 195),
         appBar: AppBar(
           centerTitle: true,
-          backgroundColor: const Color.fromRGBO(49, 30, 5, 1),
+          backgroundColor: const Color.fromARGB(255, 86, 53, 11),
           title: const Text('TrueGallery', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
         ),
         body: SafeArea(
@@ -66,15 +67,63 @@ class HomeBody extends StatelessWidget {
           ),
         ),
         child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-        Text(
-          'Welcome!',
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)
+          Text(
+            'Welcome!',
+            style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)
+            ),
+          Text(
+            "It's your first day as museum curator! You've been tasked with putting together a gallery for visitors next week. Beware though - interspered among your choices are AI images.\n",
+            style: TextStyle(fontSize: 16)
           ),
-        Text(
-          "It's your first day as museum curator! You've been tasked with putting together a gallery for visitors next week. Beware though - interspered among your choices are AI images.\n",
-          style: TextStyle(fontSize: 16)
-          )   
+          HomeButtons()
     ]));
+  }
+}
+
+class HomeButtons extends StatelessWidget {
+  const HomeButtons({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor:
+            WidgetStateProperty.all<Color>(Color.fromARGB(255, 52, 77, 82)),
+            foregroundColor:
+            WidgetStateProperty.all<Color>(Colors.white),
+          ),
+          onPressed: () {
+             Navigator.pushReplacement(
+              context,
+              MaterialPageRoute<void>(
+                builder: (context) => const Game(),
+              )
+             );
+          },
+          child: const Text('Play')
+        ),
+        const SizedBox(width: 20),
+        ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor:
+            WidgetStateProperty.all<Color>(Colors.white),
+            foregroundColor:
+            WidgetStateProperty.all<Color>(Colors.black),
+          ),
+          onPressed: () {
+             Navigator.pushReplacement(
+              context,
+              MaterialPageRoute<void>(
+                builder: (context) => const Game(),
+              )
+             );
+          },
+          child: const Text('Resume')
+        )
+    ]);
   }
 }
 
@@ -90,4 +139,13 @@ class HomeFooter extends StatelessWidget {
         style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic)
       )   ]);
     }
+}
+
+class Game extends StatelessWidget {
+  const Game({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column();
+  }
 }
