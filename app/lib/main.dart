@@ -135,7 +135,7 @@ class HomeFooter extends StatelessWidget {
     return Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
       const Divider(),
       Text(
-        "AI art can sometimes look real",
+        "AI art can sometimes look real. That doesn't mean it is.",
         style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic)
       )   ]);
     }
