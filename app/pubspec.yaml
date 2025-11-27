@@ -1,5 +1,5 @@
-name: app
-description: "A new Flutter project."
+name: TrueGallery
+description: "A game where the user plays an art curator trying to select real art in a sea of AI generated work."
 publish_to: 'none'
 version: 0.1.0
 
