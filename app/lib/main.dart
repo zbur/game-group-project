@@ -221,7 +221,7 @@ class Door extends StatelessWidget {
   }
 }
 
-class GamePage extends StatelessWidget {
+cclass GamePage extends StatelessWidget {
   final String theme;
   final Gallery allWorks = Gallery();
   late Painting random1;
@@ -239,11 +239,10 @@ class GamePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: allWorks.themeColors[allWorks.themes.indexOf(theme)],
       appBar: AppBar(
-        automaticallyImplyLeading: false,
         centerTitle: true,
         backgroundColor: allWorks.themeColors[allWorks.themes.indexOf(theme)],
         title: Text('TrueGallery: $theme',
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
       body: SafeArea(
         child: Padding(
@@ -302,6 +301,32 @@ class GamePage extends StatelessWidget {
                   ),
                 ),
               ),
+SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                    ),
+                    onPressed: () {
+                      _handleChoice("Painting 1");
+                    },
+                    child: const Text("Painting 1"),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                    ),
+                    onPressed: () {
+                      _handleChoice("Painting 2");
+                    },
+                    child: const Text("Painting 2"),
+                  ),
+                ],
+              ),
 
               Expanded(child: Container()),
             ],
@@ -310,8 +335,17 @@ class GamePage extends StatelessWidget {
       ),
     );
   }
-}
+void _handleChoice(String choice) {
+  bool isCorrect = false;
 
+  if (choice == "Painting 1") {
+    isCorrect = (random1.type == "Real");
+  } else if (choice == "Painting 2") {
+    isCorrect = (random2.type == "Real");
+  }
+
+
+}}
 class FullscreenImageHero extends StatelessWidget {
   final String tag;
   final String assetPath;
