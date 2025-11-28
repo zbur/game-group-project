@@ -98,7 +98,7 @@ class HomeButtons extends StatelessWidget {
             WidgetStateProperty.all<Color>(Colors.white),
           ),
           onPressed: () {
-             Navigator.pushReplacement(
+             Navigator.push(
               context,
               MaterialPageRoute<void>(
                 builder: (context) => const Game(),
@@ -116,7 +116,7 @@ class HomeButtons extends StatelessWidget {
             WidgetStateProperty.all<Color>(Colors.black),
           ),
           onPressed: () {
-             Navigator.pushReplacement(
+             Navigator.push(
               context,
               MaterialPageRoute<void>(
                 builder: (context) => const Game(),
@@ -138,7 +138,7 @@ class HomeFooter extends StatelessWidget {
       const Divider(),
       Text(
         "AI creations sometimes look like art. That doesn't mean they are.",
-        style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic)
+        style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)
       )   ]);
     }
 }
@@ -154,7 +154,14 @@ class Game extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 86, 53, 11),
-        title: const Text('TrueGallery', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+        title: const Text('TrueGallery', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          color: Colors.white,
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
       ),
       body: SafeArea(
         child: Padding(
@@ -198,10 +205,10 @@ class Door extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
       IconButton(
-        icon: Image.asset("assets/$name-Door.png", height: 150),
-        iconSize: 150,
+        icon: Image.asset("assets/$name-Door.png", height: 125),
+        iconSize: 125,
         onPressed: () {
-          Navigator.pushReplacement(
+          Navigator.push(
             context,
             MaterialPageRoute<void>(
               builder: (context) => GamePage(name),
@@ -234,7 +241,14 @@ class GamePage extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: allWorks.themeColors[allWorks.themes.indexOf(theme)],
-        title: Text('TrueGallery: $theme', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+        title: Text('TrueGallery: $theme', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          color: Colors.white,
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        )
       ),
       body: SafeArea(
         child: Padding(
@@ -243,12 +257,12 @@ class GamePage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start, // Changed from center to start
             crossAxisAlignment: CrossAxisAlignment.center, // Ensure horizontal centering
             children: [
-              Container(
+              SizedBox(
                 width: 200, 
                 child: Image.asset('assets/$theme-AI-${random1.number}.png', fit: BoxFit.fitHeight)
               ),
               SizedBox(height: 10), // Add spacing between images
-              Container(
+              SizedBox(
                 width: 200, 
                 child: Image.asset('assets/$theme-Real-${random2.number}.png', fit: BoxFit.fitHeight)
               ),
