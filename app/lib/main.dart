@@ -228,8 +228,8 @@ class GamePage extends StatelessWidget {
   late Painting random2;
 
   GamePage(this.theme, {super.key}) {
-    int rn1 = Random().nextInt(6)+1;
-    int rn2 = Random().nextInt(6)+1;
+    int rn1 = Random().nextInt(6) + 1;
+    int rn2 = Random().nextInt(6) + 1;
     random1 = allWorks.returnPainting(theme, "AI", rn1);
     random2 = allWorks.returnPainting(theme, "Real", rn2);
   }
@@ -241,37 +241,99 @@ class GamePage extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: allWorks.themeColors[allWorks.themes.indexOf(theme)],
-        title: Text('TrueGallery: $theme', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          color: Colors.white,
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        )
+        title: Text('TrueGallery: $theme',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(10),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start, // Changed from center to start
-            crossAxisAlignment: CrossAxisAlignment.center, // Ensure horizontal centering
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(
-                width: 200, 
-                child: Image.asset('assets/$theme-AI-${random1.number}.png', fit: BoxFit.fitHeight)
+              
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FullscreenImageHero(
+                        tag: 'ai-${random1.number}-$theme',
+                        assetPath:
+                            'assets/$theme-AI-${random1.number}.png',
+                      ),
+                    ),
+                  );
+                },
+                child: Hero(
+                  tag: 'ai-${random1.number}-$theme',
+                  child: SizedBox(
+                    width: 200,
+                    child: Image.asset(
+                        'assets/$theme-AI-${random1.number}.png',
+                        fit: BoxFit.fitHeight),
+                  ),
+                ),
               ),
-              SizedBox(height: 10), // Add spacing between images
-              SizedBox(
-                width: 200, 
-                child: Image.asset('assets/$theme-Real-${random2.number}.png', fit: BoxFit.fitHeight)
+
+              SizedBox(height: 10),
+
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FullscreenImageHero(
+                        tag: 'real-${random2.number}-$theme',
+                        assetPath:
+                            'assets/$theme-Real-${random2.number}.png',
+                      ),
+                    ),
+                  );
+                },
+                child: Hero(
+                  tag: 'real-${random2.number}-$theme',
+                  child: SizedBox(
+                    width: 200,
+                    child: Image.asset(
+                        'assets/$theme-Real-${random2.number}.png',
+                        fit: BoxFit.fitHeight),
+                  ),
+                ),
               ),
-              // This spacer will push everything to the top and leave space at bottom
-              Expanded(child: Container()), // This creates flexible space at the bottom
-            ]
-          )
-        )
-      )
+
+              Expanded(child: Container()),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class FullscreenImageHero extends StatelessWidget {
+  final String tag;
+  final String assetPath;
+
+  const FullscreenImageHero({
+    required this.tag,
+    required this.assetPath,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: GestureDetector(
+        onTap: () => Navigator.pop(context),
+        child: Center(
+          child: Hero(
+            tag: tag,
+            child: Image.asset(assetPath),
+          ),
+        ),
+      ),
     );
   }
 }
