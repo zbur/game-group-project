@@ -221,27 +221,99 @@ class Door extends StatelessWidget {
   }
 }
 
-cclass GamePage extends StatelessWidget {
+class GamePage extends StatefulWidget {
   final String theme;
+
+  const GamePage(this.theme, {super.key});
+
+  @override
+  State<GamePage> createState() => _GamePageState();
+}
+
+class _GamePageState extends State<GamePage> {
   final Gallery allWorks = Gallery();
+
   late Painting random1;
   late Painting random2;
 
-  GamePage(this.theme, {super.key}) {
-    int rn1 = Random().nextInt(6) + 1;
-    int rn2 = Random().nextInt(6) + 1;
-    random1 = allWorks.returnPainting(theme, "AI", rn1);
-    random2 = allWorks.returnPainting(theme, "Real", rn2);
+  Painting? previous1;
+  Painting? previous2;
+
+  int round = 1; 
+  List<Painting> chosenGallery = [];
+
+  @override
+  void initState() {
+    super.initState();
+    generateNewPaintings();
   }
 
+  void generateNewPaintings() {
+    Painting new1;
+    Painting new2;
+
+    do {
+      int rn1 = Random().nextInt(6) + 1;
+      int rn2 = Random().nextInt(6) + 1;
+
+      new1 = allWorks.returnPainting(widget.theme, "AI", rn1);
+      new2 = allWorks.returnPainting(widget.theme, "Real", rn2);
+
+    } while (
+        (previous1 != null &&
+            new1.number == previous1!.number &&
+            new1.type == previous1!.type) ||
+        (previous2 != null &&
+            new2.number == previous2!.number &&
+            new2.type == previous2!.type));
+
+    random1 = new1;
+    random2 = new2;
+
+    previous1 = random1;
+    previous2 = random2;
+
+    setState(() {});
+  }
+void choosePainting(Painting chosen) {
+    chosenGallery.add(chosen);
+
+    if (round == 1) {
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => GamePage(widget.theme), 
+        ),
+      );
+    } else {
+
+
+      allWorks.markThemeCompleted(widget.theme); 
+
+      if (allWorks.allThemesCompleted()) {
+     
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const Game()),
+        );
+      } else {
+     
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const Game()),
+        );
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: allWorks.themeColors[allWorks.themes.indexOf(theme)],
+      backgroundColor: allWorks.themeColors[allWorks.themes.indexOf(widget.theme)],
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: allWorks.themeColors[allWorks.themes.indexOf(theme)],
-        title: Text('TrueGallery: $theme',
+        backgroundColor: allWorks.themeColors[allWorks.themes.indexOf(widget.theme)],
+        title: Text('TrueGallery: ${widget.theme}',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
       body: SafeArea(
@@ -258,19 +330,19 @@ cclass GamePage extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => FullscreenImageHero(
-                        tag: 'ai-${random1.number}-$theme',
+                        tag: 'ai-${random1.number}-${widget.theme}',
                         assetPath:
-                            'assets/$theme-AI-${random1.number}.png',
+                            'assets/${widget.theme}-AI-${random1.number}.png',
                       ),
                     ),
                   );
                 },
                 child: Hero(
-                  tag: 'ai-${random1.number}-$theme',
+                  tag: 'ai-${random1.number}-${widget.theme}',
                   child: SizedBox(
                     width: 200,
                     child: Image.asset(
-                        'assets/$theme-AI-${random1.number}.png',
+                        'assets/${widget.theme}-AI-${random1.number}.png',
                         fit: BoxFit.fitHeight),
                   ),
                 ),
@@ -284,19 +356,19 @@ cclass GamePage extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => FullscreenImageHero(
-                        tag: 'real-${random2.number}-$theme',
+                        tag: 'real-${random2.number}-${widget.theme}',
                         assetPath:
-                            'assets/$theme-Real-${random2.number}.png',
+                            'assets/${widget.theme}-Real-${random2.number}.png',
                       ),
                     ),
                   );
                 },
                 child: Hero(
-                  tag: 'real-${random2.number}-$theme',
+                  tag: 'real-${random2.number}-${widget.theme}',
                   child: SizedBox(
                     width: 200,
                     child: Image.asset(
-                        'assets/$theme-Real-${random2.number}.png',
+                        'assets/${widget.theme}-Real-${random2.number}.png',
                         fit: BoxFit.fitHeight),
                   ),
                 ),
@@ -311,7 +383,7 @@ SizedBox(height: 30),
                       foregroundColor: Colors.black,
                     ),
                     onPressed: () {
-                      _handleChoice("Painting 1");
+                      choosePainting(random1);
                     },
                     child: const Text("Painting 1"),
                   ),
@@ -321,7 +393,7 @@ SizedBox(height: 30),
                       foregroundColor: Colors.black,
                     ),
                     onPressed: () {
-                      _handleChoice("Painting 2");
+                      choosePainting(random2);
                     },
                     child: const Text("Painting 2"),
                   ),
@@ -335,17 +407,7 @@ SizedBox(height: 30),
       ),
     );
   }
-void _handleChoice(String choice) {
-  bool isCorrect = false;
-
-  if (choice == "Painting 1") {
-    isCorrect = (random1.type == "Real");
-  } else if (choice == "Painting 2") {
-    isCorrect = (random2.type == "Real");
-  }
-
-
-}}
+}
 class FullscreenImageHero extends StatelessWidget {
   final String tag;
   final String assetPath;
