@@ -20,6 +20,7 @@ class Gallery {
     Color.fromARGB(150, 255, 255, 255),
     Color.fromARGB(150, 141, 59, 59)
   ];
+  List<String> completedThemes = [];
 void markThemeCompleted(String theme) {
   if (!completedThemes.contains(theme)) {
     completedThemes.add(theme);
