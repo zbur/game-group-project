@@ -28,7 +28,7 @@ void markThemeCompleted(String theme) {
 }
 
 bool allThemesCompleted() {
-  return completedThemes.length == 6;
+  return completedThemes.length == 5;
 }
   void add(String theme, String type, int number) {
     if(type == "AI") {
