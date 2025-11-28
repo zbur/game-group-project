@@ -223,8 +223,17 @@ class Door extends StatelessWidget {
 
 class GamePage extends StatefulWidget {
   final String theme;
+  final int round;
+  final Painting? prev1;
+  final Painting? prev2;
 
-  const GamePage(this.theme, {super.key});
+  const GamePage(
+    this.theme, {
+    this.round = 1,
+    this.prev1,
+    this.prev2,
+    super.key,
+  });
 
   @override
   State<GamePage> createState() => _GamePageState();
@@ -239,12 +248,17 @@ class _GamePageState extends State<GamePage> {
   Painting? previous1;
   Painting? previous2;
 
-  int round = 1; 
+  int round = 1;
   List<Painting> chosenGallery = [];
 
   @override
   void initState() {
     super.initState();
+
+    round = widget.round;
+    previous1 = widget.prev1;
+    previous2 = widget.prev2;
+
     generateNewPaintings();
   }
 
@@ -270,51 +284,47 @@ class _GamePageState extends State<GamePage> {
     random1 = new1;
     random2 = new2;
 
-    previous1 = random1;
-    previous2 = random2;
-
     setState(() {});
   }
-void choosePainting(Painting chosen) {
+
+  void choosePainting(Painting chosen) {
     chosenGallery.add(chosen);
 
     if (round == 1) {
-
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => GamePage(widget.theme), 
+          builder: (_) => GamePage(
+            widget.theme,
+            round: 2,
+            prev1: random1,
+            prev2: random2,
+          ),
         ),
       );
-    } else {
+    }
+    else {
+      allWorks.markThemeCompleted(widget.theme);
 
-
-      allWorks.markThemeCompleted(widget.theme); 
-
-      if (allWorks.allThemesCompleted()) {
-     
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const Game()),
-        );
-      } else {
-     
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const Game()),
-        );
-      }
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const Game()),
+      );
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: allWorks.themeColors[allWorks.themes.indexOf(widget.theme)],
+      backgroundColor:
+          allWorks.themeColors[allWorks.themes.indexOf(widget.theme)],
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: allWorks.themeColors[allWorks.themes.indexOf(widget.theme)],
+        backgroundColor:
+            allWorks.themeColors[allWorks.themes.indexOf(widget.theme)],
         title: Text('TrueGallery: ${widget.theme}',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            style:
+                const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
       body: SafeArea(
         child: Padding(
@@ -323,7 +333,6 @@ void choosePainting(Painting chosen) {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -348,7 +357,7 @@ void choosePainting(Painting chosen) {
                 ),
               ),
 
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
 
               GestureDetector(
                 onTap: () {
@@ -373,7 +382,9 @@ void choosePainting(Painting chosen) {
                   ),
                 ),
               ),
-SizedBox(height: 30),
+
+              const SizedBox(height: 30),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
@@ -382,9 +393,7 @@ SizedBox(height: 30),
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black,
                     ),
-                    onPressed: () {
-                      choosePainting(random1);
-                    },
+                    onPressed: () => choosePainting(random1),
                     child: const Text("Painting 1"),
                   ),
                   ElevatedButton(
@@ -392,9 +401,7 @@ SizedBox(height: 30),
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black,
                     ),
-                    onPressed: () {
-                      choosePainting(random2);
-                    },
+                    onPressed: () => choosePainting(random2),
                     child: const Text("Painting 2"),
                   ),
                 ],
@@ -408,6 +415,7 @@ SizedBox(height: 30),
     );
   }
 }
+
 class FullscreenImageHero extends StatelessWidget {
   final String tag;
   final String assetPath;
