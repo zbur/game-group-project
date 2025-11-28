@@ -20,7 +20,15 @@ class Gallery {
     Color.fromARGB(150, 255, 255, 255),
     Color.fromARGB(150, 141, 59, 59)
   ];
+void markThemeCompleted(String theme) {
+  if (!completedThemes.contains(theme)) {
+    completedThemes.add(theme);
+  }
+}
 
+bool allThemesCompleted() {
+  return completedThemes.length == 6;
+}
   void add(String theme, String type, int number) {
     if(type == "AI") {
       gallery.add(Painting(theme, type, number.toString(), descriptionsAI[themes.indexOf(theme)][number-1]));
