@@ -239,10 +239,11 @@ class GamePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: allWorks.themeColors[allWorks.themes.indexOf(theme)],
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         centerTitle: true,
         backgroundColor: allWorks.themeColors[allWorks.themes.indexOf(theme)],
         title: Text('TrueGallery: $theme',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
       ),
       body: SafeArea(
         child: Padding(
