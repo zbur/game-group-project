@@ -710,7 +710,8 @@ SizedBox(
                   );
                 },
                 child: const Text("Play Again"),
-             
+              ),
+          
               if (accuracy <= 60) ...[
                 const SizedBox(height: 20),
 
@@ -731,6 +732,7 @@ SizedBox(
                         offset: Offset(3, 3),
                         blurRadius: 6,
                       ),
+                     
                     ],
                     gradient: const LinearGradient(
                       colors: [
