@@ -463,16 +463,12 @@ Container(
   padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 22),
   margin: const EdgeInsets.only(top: 20, bottom: 25),
   decoration: BoxDecoration(
-    color: const Color(0xFFF7E7C1), // parchment tone
+    color: const Color(0xFFF7E7C1),
     borderRadius: BorderRadius.circular(14),
-
-    // Burnt-edge border
     border: Border.all(
       color: const Color(0xFF3C2F17),
       width: 3,
     ),
-
-    // Subtle textured gradient to mimic old paper
     gradient: const LinearGradient(
       colors: [
         Color(0xFFF7E7C1),
@@ -483,24 +479,18 @@ Container(
       end: Alignment.bottomRight,
     ),
   ),
-  child: Text(
+  child: const Text(
     "Which painting will you choose for your gallery?",
     textAlign: TextAlign.center,
     style: TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.w600,
-      color: const Color(0xFF3C2F17),
-      fontFamily: "Georgia", // handwritten/old-style serif
-      shadows: [
-        Shadow(
-          offset: Offset(1, 1),
-          blurRadius: 1,
-          color: Colors.black.withValues(),
-        )
-      ],
+      color: Color(0xFF3C2F17),
+      height: 1.35,
     ),
   ),
 ),
+
 
             //Buttons for choosing paintings
             Row(
@@ -720,7 +710,56 @@ SizedBox(
                   );
                 },
                 child: const Text("Play Again"),
-              ),
+             
+              if (accuracy <= 60) ...[
+                const SizedBox(height: 20),
+
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 18, horizontal: 22),
+                  margin: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF7E7C1),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: const Color(0xFF3C2F17),
+                      width: 3,
+                    ),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.brown,
+                        offset: Offset(3, 3),
+                        blurRadius: 6,
+                      ),
+                      BoxShadow(
+                        color: Colors.white60,
+                        offset: Offset(-3, -3),
+                        blurRadius: 6,
+                      ),
+                    ],
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFFF7E7C1),
+                        Color(0xFFF0DDAF),
+                        Color(0xFFF7E7C1),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: const Text(
+                    "Your gallery stirred up a bit of controversy...\n"
+                    "Looks like people don't want to see AI art.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
