@@ -456,38 +456,86 @@ class _GamePageState extends State<GamePage> {
                 ),
               ),
 
-              const SizedBox(height: 30),
+                         const SizedBox(height: 20),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                    ),
-                    onPressed: () => choosePainting(display1),
-                    child: const Text("Painting 1"),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                    ),
-                    onPressed: () => choosePainting(display2),
-                    child: const Text("Painting 2"),
-                  ),
-                ],
-              ),
+        //parchment style dialogue box
+Container(
+  padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 22),
+  margin: const EdgeInsets.only(top: 20, bottom: 25),
+  decoration: BoxDecoration(
+    color: const Color(0xFFF7E7C1), // parchment tone
+    borderRadius: BorderRadius.circular(14),
 
-              Expanded(child: Container()),
-            ],
-          ),
+    // Burnt-edge border
+    border: Border.all(
+      color: const Color(0xFF3C2F17),
+      width: 3,
+    ),
+
+    // Subtle textured gradient to mimic old paper
+    gradient: const LinearGradient(
+      colors: [
+        Color(0xFFF7E7C1),
+        Color(0xFFF0DDAF),
+        Color(0xFFF7E7C1),
+      ],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    ),
+  ),
+  child: Text(
+    "Which painting will you choose for your gallery?",
+    textAlign: TextAlign.center,
+    style: TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      color: const Color(0xFF3C2F17),
+      fontFamily: "Georgia", // handwritten/old-style serif
+      shadows: [
+        Shadow(
+          offset: Offset(1, 1),
+          blurRadius: 1,
+          color: Colors.black.withValues(),
+        )
+      ],
+    ),
+  ),
+),
+
+            //Buttons for choosing paintings
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                  ),
+                  onPressed: () => choosePainting(display1),
+                  child: const Text("Painting 1"),
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                  ),
+                  onPressed: () => choosePainting(display2),
+                  child: const Text("Painting 2"),
+                ),
+              ],
+            ),
+
+            Expanded(child: Container()),
+          ],
         ),
       ),
-    );
-  }
-}
+    ),
+  );
+}}
 
 class FullscreenImageHero extends StatelessWidget {
   final String tag;
