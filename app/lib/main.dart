@@ -521,37 +521,66 @@ class FullscreenImageHero extends StatelessWidget {
   }
 }
 
-class EndPage extends StatelessWidget {
-
+class EndPage extends StatefulWidget {
   const EndPage({super.key});
 
   @override
+  State<EndPage> createState() => _EndPageState();
+}
+
+class _EndPageState extends State<EndPage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 12),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Get current game state
+    //Get current game state
     ValueNotifier<GameState> gsNotifier = GameStateProvider.of(context);
     GameState gameState = gsNotifier.value;
 
     List<Painting> savedGallery = gameState._savedWorks.gallery;
-    // Work out accuracy percentage
-    double accuracy = 100*savedGallery.where((item) => item.type != "AI").toList().length / savedGallery.length;
-    
+  // Work out accuracy percentage
+    double accuracy = 100 *
+        savedGallery.where((item) => item.type != "AI").toList().length /
+        savedGallery.length;
+
     String displayText;
-    if(accuracy > 60) {
-      // Win
-      displayText = "Success! Your gallery was hugely successful, and people are visiting in droves.";
+    //Win
+    if (accuracy > 60) {
+      displayText =
+          "Success! Your gallery was hugely successful, and people are visiting in droves.";
     } else {
-      // Loss
-      // Inaccuracy percentage
-      double inaccurracy = 100 - accuracy;
-      displayText = "Failure! At first, people seemed indifferent to the work you had put together. But when they found out it was ${inaccurracy.toInt()}% AI, controversy grew.";
+      //Loss
+      //Inaccuracy percentage
+      double inaccuracy = 100 - accuracy;
+      displayText =
+          "Failure! At first, people seemed indifferent to the work you had put together. But when they found out it was ${inaccuracy.toInt()}% AI, controversy grew.";
     }
 
-    return Scaffold (
+    return Scaffold(
       backgroundColor: const Color.fromARGB(255, 249, 249, 195),
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 86, 53, 11),
-        title: const Text('TrueGallery: ', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+        title: const Text('TrueGallery',
+            style: TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold)),
       ),
       body: SafeArea(
         child: Padding(
@@ -560,10 +589,94 @@ class EndPage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(displayText)
-            ])
-        )
-      )
+              Text(
+                displayText,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+
+              const SizedBox(height: 40),
+              
+SizedBox(
+  width: double.infinity,
+  height: 260,
+  child: AnimatedBuilder(
+    animation: controller,
+    builder: (_, __) {
+      final double progress = controller.value; 
+      final double screenWidth = MediaQuery.of(context).size.width;
+
+      const double paintingSize = 170;     
+      const double gap = 60;               
+      final double totalWidthPerPainting = paintingSize + gap;
+// Total virtual width = enough space for all paintings + extra loop room
+      final double totalSpan =
+          totalWidthPerPainting * savedGallery.length + screenWidth;
+
+      return Stack(
+        children: [
+          Align(
+            alignment: Alignment.topCenter,
+            child: Text(
+              "Your Gallery",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.brown[900],
+              ),
+            ),
+          ),
+
+          ...List.generate(savedGallery.length, (index) {
+            final painting = savedGallery[index];
+            double baseX = (progress * 0.2 * totalSpan) % totalSpan;
+            double paintingStart = index * totalWidthPerPainting;
+            double x = paintingStart - baseX;
+            if (x < -paintingSize) {
+              x += totalSpan;
+            }
+
+            return Positioned(
+              top: 80,
+              left: x,
+              child: SizedBox(
+                width: paintingSize,
+                height: paintingSize,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.asset(
+                    'assets/${painting.theme}-${painting.type}-${painting.number}.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
+      );
+    },
+  ),
+),
+
+              const SizedBox(height: 40),
+
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const Home()),
+                  );
+                },
+                child: const Text("Play Again"),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
