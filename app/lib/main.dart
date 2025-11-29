@@ -731,11 +731,6 @@ SizedBox(
                         offset: Offset(3, 3),
                         blurRadius: 6,
                       ),
-                      BoxShadow(
-                        color: Colors.white60,
-                        offset: Offset(-3, -3),
-                        blurRadius: 6,
-                      ),
                     ],
                     gradient: const LinearGradient(
                       colors: [
