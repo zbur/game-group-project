@@ -599,16 +599,15 @@ class _EndPageState extends State<EndPage>
         savedGallery.length;
 
     String displayText;
-    //Win
-    if (accuracy > 60) {
-      displayText =
-          "Success! Your gallery was hugely successful, and people are visiting in droves.";
+    Color scoreColor;
+    // Win
+    if (accuracy >= 60) {
+      displayText = "Success! Your gallery was hugely successful, and people are visiting in droves.";
+      scoreColor = Colors.green;
     } else {
-      //Loss
-      //Inaccuracy percentage
-      double inaccuracy = 100 - accuracy;
-      displayText =
-          "Failure! At first, people seemed indifferent to the work you had put together. But when they found out it was ${inaccuracy.toInt()}% AI, controversy grew.";
+      // Loss
+      displayText = "Your gallery stirred up a bit of controversy...\nLooks like people don't want to see AI art.";
+      scoreColor = Colors.red;
     }
 
     return Scaffold(
@@ -627,140 +626,133 @@ class _EndPageState extends State<EndPage>
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              Text("Score: ", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
               Text(
-                displayText,
+                "${accuracy.toInt()}%",
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: scoreColor
                 ),
               ),
-
               const SizedBox(height: 40),
-              
-SizedBox(
-  width: double.infinity,
-  height: 260,
-  child: AnimatedBuilder(
-    animation: controller,
-    builder: (_, __) {
-      final double progress = controller.value; 
-      final double screenWidth = MediaQuery.of(context).size.width;
+              SizedBox(
+                width: double.infinity,
+                height: 240,
+                child: AnimatedBuilder(
+                  animation: controller,
+                  builder: (_, __) {
+                    final double progress = controller.value; 
+                    final double screenWidth = MediaQuery.of(context).size.width;
 
-      const double paintingSize = 170;     
-      const double gap = 60;               
-      final double totalWidthPerPainting = paintingSize + gap;
-// Total virtual width = enough space for all paintings + extra loop room
-      final double totalSpan =
-          totalWidthPerPainting * savedGallery.length + screenWidth;
+                    const double paintingSize = 170;     
+                    const double gap = 30;               
+                    final double totalWidthPerPainting = paintingSize + gap;
+                     // Total virtual width = enough space for all paintings + extra loop room
+                    final double totalSpan =
+                        totalWidthPerPainting * savedGallery.length + screenWidth;
+                    return Stack(
+                      children: [
+                        Align(
+                          alignment: Alignment.topCenter,
+                          child: Text(
+                            "Your Gallery",
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.brown[900],
+                            ),
+                          ),
+                        ),
 
-      return Stack(
-        children: [
-          Align(
-            alignment: Alignment.topCenter,
-            child: Text(
-              "Your Gallery",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.brown[900],
+                        ...List.generate(savedGallery.length, (index) {
+                          final painting = savedGallery[index];
+                          double baseX = (progress * 0.2 * totalSpan) % totalSpan;
+                          double paintingStart = index * totalWidthPerPainting;
+                          double x = paintingStart - baseX;
+                          if (x < -paintingSize) {
+                            x += totalSpan;
+                          }
+
+                          return Positioned(
+                            top: 60,
+                            left: x,
+                            child: SizedBox(
+                              width: paintingSize,
+                              height: paintingSize,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Image.asset(
+                                  'assets/${painting.theme}-${painting.type}-${painting.number}.png',
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      ],
+                    );
+                  },
+                ),
               ),
-            ),
-          ),
-
-          ...List.generate(savedGallery.length, (index) {
-            final painting = savedGallery[index];
-            double baseX = (progress * 0.2 * totalSpan) % totalSpan;
-            double paintingStart = index * totalWidthPerPainting;
-            double x = paintingStart - baseX;
-            if (x < -paintingSize) {
-              x += totalSpan;
-            }
-
-            return Positioned(
-              top: 80,
-              left: x,
-              child: SizedBox(
-                width: paintingSize,
-                height: paintingSize,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: Image.asset(
-                    'assets/${painting.theme}-${painting.type}-${painting.number}.png',
-                    fit: BoxFit.cover,
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                    vertical: 18, horizontal: 22),
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF7E7C1),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: const Color(0xFF3C2F17),
+                    width: 3,
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.brown,
+                      offset: Offset(3, 3),
+                      blurRadius: 6,
+                    ),
+                    
+                  ],
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFFF7E7C1),
+                      Color(0xFFF0DDAF),
+                      Color(0xFFF7E7C1),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                 ),
+                child: Text(
+                  displayText,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                    height: 1.35,
+                  )
+                )
               ),
-            );
-          }),
-        ],
-      );
-    },
-  ),
-),
-
-              const SizedBox(height: 40),
-
+              SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () => [
+                  gameState.reset(),
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                         builder: (_) => const Home()),
-                  );
-                },
+                  )                  
+                ],
                 child: const Text("Play Again"),
               ),
-          
-              if (accuracy <= 60) ...[
-                const SizedBox(height: 20),
-
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 18, horizontal: 22),
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF7E7C1),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: const Color(0xFF3C2F17),
-                      width: 3,
-                    ),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.brown,
-                        offset: Offset(3, 3),
-                        blurRadius: 6,
-                      ),
-                     
-                    ],
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFFF7E7C1),
-                        Color(0xFFF0DDAF),
-                        Color(0xFFF7E7C1),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                  ),
-                  child: const Text(
-                    "Your gallery stirred up a bit of controversy...\n"
-                    "Looks like people don't want to see AI art.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                      height: 1.35,
-                    ),
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
+            ]
+          )
+        )
+      )
     );
   }
 }
