@@ -318,22 +318,9 @@ class HomeFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
       const Divider(),
-      GestureDetector(
-        onTap: () {
-          MessageDialog(
-            title: "Signs it might be AI",
-            message: 
-            '''1. Illegible text/markings\n
-2. Near-identical faces\n
-3. Cartoon-like qualities\n
-4. Incomplete people, animals, or objects\n
-5. Overly-perfect markings or brushstrokes'''
-          ).show(context);
-        },
-        child: Text(
-          "AI creations sometimes look like art. That doesn't mean they are.",
-          style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic, fontWeight: FontWeight.bold)
-        ),
+      Text(
+        "AI creations sometimes look like art. That doesn't mean they are.",
+        style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic, fontWeight: FontWeight.bold)
       )
     ]);
     }
@@ -1032,23 +1019,67 @@ class _EndPageState extends State<EndPage> with SingleTickerProviderStateMixin {
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
-
-              ElevatedButton(
-                onPressed: () {
-                  gameState.reset();
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => const Home()),
-                  );
-                },
-                child: const Text("Play Again"),
-              ),
-            ],
-          ),
-        ),
-      ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor:
+                      WidgetStateProperty.all<Color>(Color.fromARGB(255, 52, 77, 82)),
+                      foregroundColor:
+                      WidgetStateProperty.all<Color>(Colors.white),
+                    ),
+                    onPressed: () => [
+                      gameState.reset(),
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (context) => const Game(),
+                        )
+                      )
+                    ],
+                    child: const Text('Play Again')
+                  ),
+                  const SizedBox(width: 20),
+                  ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor:
+                      WidgetStateProperty.all<Color>(Colors.white),
+                      foregroundColor:
+                      WidgetStateProperty.all<Color>(Colors.black),
+                    ),
+                    onPressed: () => [
+                      gameState.reset(),
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute<void>(
+                          builder: (context) => const Home(),
+                        )
+                      )
+                    ],
+                    child: const Text('Exit')
+                  )
+              ]),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: ()  {
+                      MessageDialog(
+                        title: "Signs it might be AI",
+                        message: '''1. Illegible text/markings\n2. Near-identical faces\n3. Cartoon-like qualities\n4. Incomplete people, animals, or objects\n5. Overly-perfect markings or brushstrokes'''
+                      ).show(context);
+                    },
+                    iconSize: 20,
+                    icon: const Icon(Icons.info),
+                  )
+                ]
+              )        
+            ]
+          )
+        )
+      )
     );
   }
 }
