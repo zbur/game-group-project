@@ -40,3 +40,6 @@ https://www.tomlea.com/post/tom-lea-the-creator-of-the-two-thousand-yard-stare
 https://www.npg.org.uk/collections/search/portrait/mw00724/The-Siege-of-Gibraltar-1782
 https://catalog.archives.gov/id/6446341
 https://collection.nam.ac.uk/detail.php?acc=1959-11-303-1
+
+This reference contains information about how to identify AI images:
+https://interestingengineering.com/lists/10-ways-spot-ai-generated-images

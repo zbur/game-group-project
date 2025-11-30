@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'models/exported_data.dart';
 import 'dart:math';
+
+const String ALL_WORKS_KEY = "AllWorks";
+const String SAVED_WORKS_KEY = "SavedWorks";
 
 void main() {
   runApp(
@@ -12,6 +14,17 @@ void main() {
       child: const MainApp()
     )
   );
+}
+
+class MainApp extends StatelessWidget {
+  const MainApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: Home()
+    );
+  }
 }
 
 class GameState {
@@ -45,14 +58,163 @@ class GameStateProvider extends InheritedNotifier<ValueNotifier<GameState>> {
   }
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class GameSave extends StatelessWidget {
+  const GameSave({super.key});
+
+  Future save(BuildContext context) async {
+    ValueNotifier<GameState> gsNotifier = GameStateProvider.of(context);
+    GameState gameState = gsNotifier.value;
+
+    // Take the user-affected contents of savedWorks and put them into a single string list
+    List<String> savedWorks = [];
+    for(var i = 0; i < gameState._savedWorks.gallery.length; i++) {
+      savedWorks.add(gameState._savedWorks.gallery[i].theme);
+      savedWorks.add(gameState._savedWorks.gallery[i].type);
+      savedWorks.add(gameState._savedWorks.gallery[i].number);
+    }
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(ALL_WORKS_KEY, gameState._allWorks.themes);
+    await prefs.setStringList(SAVED_WORKS_KEY, savedWorks);
+    return;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Home()
+    return Row(
+      children: [
+        IconButton(
+          onPressed: () async {
+            await save(context);
+            const messageDialog = MessageDialog(
+              title: 'Saved',
+              message: 'Current progress has been saved!',
+            );
+            if (!context.mounted) {
+              return;
+            }
+            await messageDialog.show(context);
+          },
+          iconSize: 20,
+          icon: const Icon(Icons.save)
+        )
+      ],
     );
+  }
+}
+
+class GameLoad extends StatelessWidget {
+  const GameLoad({super.key});
+
+  Future load(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    List<String> lSavedWorks = prefs.getStringList(SAVED_WORKS_KEY) ?? [];
+    List<String> themes = prefs.getStringList(ALL_WORKS_KEY) ?? [];
+    
+    Gallery savedWorks = Gallery();
+    Gallery allWorks = Gallery();
+
+    if(lSavedWorks.isNotEmpty && themes.isNotEmpty) {
+      allWorks.themes = themes;
+
+      for(var i = 0; i < lSavedWorks.length/3; i++) {
+        savedWorks.add(lSavedWorks[i*3], lSavedWorks[i*3+1], int.parse(lSavedWorks[i*3+2]));
+      }
+    }
+
+    GameState gameState = GameState.from(allWorks, savedWorks);
+
+    if(!context.mounted) {
+      return;
+    }
+
+    ValueNotifier<GameState> gsNotifier = GameStateProvider.of(context);
+    gsNotifier.value = gameState;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor:
+            WidgetStateProperty.all<Color>(Colors.white),
+            foregroundColor:
+            WidgetStateProperty.all<Color>(Colors.black),
+          ),
+          onPressed: () async {
+            await load(context);
+
+            if (!context.mounted) {
+              return;
+            }
+
+            const messageDialog = MessageDialog(
+              title: 'Loaded',
+              message: 'Previous game has been loaded from a save!',
+            );
+            await messageDialog.show(context);
+            
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => Game()
+              ),
+            );
+
+          },
+          child: const Text('Resume')
+        )
+      ],
+    );
+  }
+}
+
+class MessageDialog {
+  final String title;
+  final String message;
+
+  const MessageDialog({required this.title, required this.message});
+
+  Future<void> show(BuildContext context) {
+    final platform = Theme.of(context).platform;
+    if (platform == TargetPlatform.iOS) {
+      return _buildCupertinoDialog(context);
+    }
+    return _buildMaterialDialog(context);
+  }
+
+  Future<void> _buildMaterialDialog(BuildContext context) {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              child: const Text('Close'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+        ]);
+    });
+  }
+
+  Future<void> _buildCupertinoDialog(BuildContext context) {
+    return showCupertinoDialog(
+      context: context,
+      builder: (context) {
+        return CupertinoAlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            CupertinoButton(
+              child: const Text('Close'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+        ]);
+    });
   }
 }
 
@@ -141,26 +303,10 @@ class HomeButtons extends StatelessWidget {
               )
              );
           },
-          child: const Text('Play')
+          child: const Text('New Game')
         ),
         const SizedBox(width: 20),
-        ElevatedButton(
-          style: ButtonStyle(
-            backgroundColor:
-            WidgetStateProperty.all<Color>(Colors.white),
-            foregroundColor:
-            WidgetStateProperty.all<Color>(Colors.black),
-          ),
-          onPressed: () {
-             Navigator.pushReplacement(
-              context,
-              MaterialPageRoute<void>(
-                builder: (context) => const Game(),
-              )
-             );
-          },
-          child: const Text('Resume')
-        )
+        GameLoad()
     ]);
   }
 }
@@ -172,10 +318,24 @@ class HomeFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
       const Divider(),
-      Text(
-        "AI creations sometimes look like art. That doesn't mean they are.",
-        style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic)
-      )   ]);
+      GestureDetector(
+        onTap: () {
+          MessageDialog(
+            title: "Signs it might be AI",
+            message: 
+            '''1. Illegible text/markings\n
+2. Near-identical faces\n
+3. Cartoon-like qualities\n
+4. Incomplete people, animals, or objects\n
+5. Overly-perfect markings or brushstrokes'''
+          ).show(context);
+        },
+        child: Text(
+          "AI creations sometimes look like art. That doesn't mean they are.",
+          style: TextStyle(fontSize: 10, fontStyle: FontStyle.italic, fontWeight: FontWeight.bold)
+        ),
+      )
+    ]);
     }
 }
 
@@ -190,14 +350,13 @@ class Game extends StatelessWidget {
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 86, 53, 11),
-        title: const Text('TrueGallery', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
+        title: const Text('Themes', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(10),
           child: Column(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
             Text("Click on a door to curate art for a theme.\nBe careful - half of what you see is AI."),
-            Text("Themes", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -216,7 +375,7 @@ class Game extends StatelessWidget {
               Door("Religion"),
               Door("War")
             ]),
-            HomeFooter()
+            GameFooter()
           ]
           ),
         )
@@ -251,7 +410,7 @@ class Door extends StatelessWidget {
             );
           }
         ),
-        Text(theme, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
+        Text(theme, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold))
       ]);
     } else {
       return Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
@@ -262,10 +421,43 @@ class Door extends StatelessWidget {
             null;
           }
         ),
-        Text(theme, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
+        Text(theme, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold))
       ]);
     }
   }
+}
+
+class GameFooter extends StatelessWidget {
+  const GameFooter({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    ValueNotifier<GameState> gsNotifier = GameStateProvider.of(context);
+    GameState gameState = gsNotifier.value;
+
+    return Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+      const Divider(),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          GameSave(),
+          IconButton(
+            onPressed: () => [
+              gameState.reset(),
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute<void>(
+                  builder: (context) => const Home(),
+                )
+              )
+            ],
+          iconSize: 20,
+          icon: const Icon(Icons.exit_to_app),
+        )
+        ]
+      )
+    ]);
+    }
 }
 
 class GamePage extends StatefulWidget {
@@ -273,12 +465,16 @@ class GamePage extends StatefulWidget {
   final int round;
   final Painting? prev1;
   final Painting? prev2;
+  final Painting? rand1;
+  final Painting? rand2;
 
   const GamePage(
     this.theme, {
     this.round = 1,
     this.prev1,
     this.prev2,
+    this.rand1,
+    this.rand2,
     super.key,
   });
 
@@ -373,9 +569,14 @@ class _GamePageState extends State<GamePage> {
   @override
   Widget build(BuildContext context) {
     // Set appbar text color depending on theme
-    Color appBarColor = Colors.white;
-    if(widget.theme == "Religion") {
-      appBarColor = Colors.black;
+    Color themeColor = gameState._allWorks.themeColors[gameState._savedWorks.themes.indexOf(widget.theme)];
+    Color textColor = Colors.white;
+    Color buttonColor = Colors.black;
+
+    // Determine text and background color based off brightness
+    if(ThemeData.estimateBrightnessForColor(themeColor) == Brightness.light) {
+      textColor = Colors.black;
+      buttonColor = Color(0xFFF7E7C1);
     }
   
     // Randomise display order
@@ -393,15 +594,13 @@ class _GamePageState extends State<GamePage> {
     }
 
     return Scaffold(
-      backgroundColor:
-          gameState._allWorks.themeColors[gameState._allWorks.themes.indexOf(widget.theme)],
+      backgroundColor: themeColor,
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor:
-            gameState._allWorks.themeColors[gameState._allWorks.themes.indexOf(widget.theme)],
-        title: Text('TrueGallery: ${widget.theme}',
+        backgroundColor: themeColor,
+        title: Text('Theme: ${widget.theme}',
             style:
-                TextStyle(color: appBarColor, fontWeight: FontWeight.bold)),
+                TextStyle(color: textColor, fontWeight: FontWeight.bold)),
       ),
       body: SafeArea(
         child: Padding(
@@ -455,51 +654,49 @@ class _GamePageState extends State<GamePage> {
                     ),
                 ),
               ),
+              const SizedBox(height: 20),
 
-                         const SizedBox(height: 20),
+              // Parchment style dialogue box
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 22),
+                margin: const EdgeInsets.only(top: 20, bottom: 25),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF7E7C1),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: const Color(0xFF3C2F17),
+                    width: 3,
+                  ),
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFFF7E7C1),
+                      Color(0xFFF0DDAF),
+                      Color(0xFFF7E7C1),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: const Text(
+                  "Which painting will you choose for your gallery?",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF3C2F17),
+                    height: 1.35,
+                  ),
+                ),
+              ),
 
-        //parchment style dialogue box
-Container(
-  padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 22),
-  margin: const EdgeInsets.only(top: 20, bottom: 25),
-  decoration: BoxDecoration(
-    color: const Color(0xFFF7E7C1),
-    borderRadius: BorderRadius.circular(14),
-    border: Border.all(
-      color: const Color(0xFF3C2F17),
-      width: 3,
-    ),
-    gradient: const LinearGradient(
-      colors: [
-        Color(0xFFF7E7C1),
-        Color(0xFFF0DDAF),
-        Color(0xFFF7E7C1),
-      ],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    ),
-  ),
-  child: const Text(
-    "Which painting will you choose for your gallery?",
-    textAlign: TextAlign.center,
-    style: TextStyle(
-      fontSize: 18,
-      fontWeight: FontWeight.w600,
-      color: Color(0xFF3C2F17),
-      height: 1.35,
-    ),
-  ),
-),
-
-
-            //Buttons for choosing paintings
+            // Buttons for choosing paintings
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
+                    backgroundColor: buttonColor,
+                    foregroundColor: textColor,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 12),
                   ),
@@ -508,8 +705,8 @@ Container(
                 ),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
+                    backgroundColor: buttonColor,
+                    foregroundColor: textColor,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 12),
                   ),
