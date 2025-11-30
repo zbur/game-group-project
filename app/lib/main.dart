@@ -763,8 +763,7 @@ class EndPage extends StatefulWidget {
   State<EndPage> createState() => _EndPageState();
 }
 
-class _EndPageState extends State<EndPage>
-    with SingleTickerProviderStateMixin {
+class _EndPageState extends State<EndPage> with SingleTickerProviderStateMixin {
   late AnimationController controller;
 
   @override
@@ -773,7 +772,7 @@ class _EndPageState extends State<EndPage>
 
     controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 12),
+      duration: const Duration(seconds: 20),
     )..repeat();
   }
 
@@ -785,25 +784,44 @@ class _EndPageState extends State<EndPage>
 
   @override
   Widget build(BuildContext context) {
-    //Get current game state
+    // Get current game state
     ValueNotifier<GameState> gsNotifier = GameStateProvider.of(context);
     GameState gameState = gsNotifier.value;
 
     List<Painting> savedGallery = gameState._savedWorks.gallery;
-  // Work out accuracy percentage
-    double accuracy = 100 *
+
+    if (savedGallery.isEmpty) {
+      return Scaffold(
+        backgroundColor: const Color.fromARGB(255, 249, 249, 195),
+        appBar: AppBar(
+          centerTitle: true,
+          backgroundColor: const Color.fromARGB(255, 86, 53, 11),
+          title: const Text(
+            'TrueGallery',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+        ),
+        body: const Center(child: Text('No paintings in the gallery.')),
+      );
+    }
+
+    // Work out accuracy percentage
+    double accuracy =
+        100 *
         savedGallery.where((item) => item.type != "AI").toList().length /
         savedGallery.length;
 
     String displayText;
     Color scoreColor;
-    // Win
+
+    // Win / Loss text
     if (accuracy >= 60) {
-      displayText = "Success! Your gallery was hugely successful, and people are visiting in droves.";
+      displayText =
+          "Success! Your gallery was hugely successful, and people are visiting in droves.";
       scoreColor = Colors.green;
     } else {
-      // Loss
-      displayText = "Your gallery stirred up a bit of controversy...\nLooks like people don't want to see AI art.";
+      displayText =
+          "Your gallery stirred up a bit of controversy...\nLooks like people don't want to see AI art.";
       scoreColor = Colors.red;
     }
 
@@ -812,9 +830,10 @@ class _EndPageState extends State<EndPage>
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 86, 53, 11),
-        title: const Text('TrueGallery',
-            style: TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'TrueGallery',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
       ),
       body: SafeArea(
         child: Padding(
@@ -823,32 +842,47 @@ class _EndPageState extends State<EndPage>
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text("Score: ", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              const Text(
+                "Score: ",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
               Text(
                 "${accuracy.toInt()}%",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: scoreColor
+                  color: scoreColor,
                 ),
               ),
               const SizedBox(height: 40),
+
               SizedBox(
                 width: double.infinity,
                 height: 240,
                 child: AnimatedBuilder(
                   animation: controller,
                   builder: (_, __) {
-                    final double progress = controller.value; 
-                    final double screenWidth = MediaQuery.of(context).size.width;
+                    final double progress = controller.value; // 0..1
+                    final double screenWidth = MediaQuery.of(
+                      context,
+                    ).size.width;
 
-                    const double paintingSize = 170;     
-                    const double gap = 30;               
+                    const double paintingSize = 170;
+                    const double gap = 30;
                     final double totalWidthPerPainting = paintingSize + gap;
-                     // Total virtual width = enough space for all paintings + extra loop room
-                    final double totalSpan =
-                        totalWidthPerPainting * savedGallery.length + screenWidth;
+
+                    // total content width occupied by the paintings
+                    final double rowWidth =
+                        savedGallery.length * totalWidthPerPainting;
+
+                    // wrapWidth: everything must travel this distance so each painting
+                    // moves from fully off-right to fully off-left
+                    final double wrapWidth = rowWidth + screenWidth;
+
+                    // Linear offset from 0 -> wrapWidth as progress goes 0 -> 1
+                    final double offset = progress * wrapWidth;
+
                     return Stack(
                       children: [
                         Align(
@@ -862,27 +896,90 @@ class _EndPageState extends State<EndPage>
                             ),
                           ),
                         ),
-
                         ...List.generate(savedGallery.length, (index) {
                           final painting = savedGallery[index];
-                          double baseX = (progress * 0.2 * totalSpan) % totalSpan;
-                          double paintingStart = index * totalWidthPerPainting;
-                          double x = paintingStart - baseX;
-                          if (x < -paintingSize) {
-                            x += totalSpan;
+
+                          // start positions, off right edge 
+                          final double paintingStart =
+                              screenWidth + index * totalWidthPerPainting;
+
+                          double x = paintingStart - offset;
+
+                          // If painting fully left of screen, wrap forward by wrapWidth
+                          while (x < -paintingSize) {
+                            x += wrapWidth;
+                          }
+
+                          // Keep x within a sane range
+                          if (x > wrapWidth) {
+                            x = x % wrapWidth;
                           }
 
                           return Positioned(
                             top: 60,
                             left: x,
-                            child: SizedBox(
-                              width: paintingSize,
-                              height: paintingSize,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: Image.asset(
-                                  'assets/${painting.theme}-${painting.type}-${painting.number}.png',
-                                  fit: BoxFit.cover,
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        ZoomPaintingPage(painting: painting),
+                                  ),
+                                );
+                              },
+                              child: SizedBox(
+                                width: paintingSize,
+                                height: paintingSize,
+                                child: Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: Image.asset(
+                                        'assets/${painting.theme}-${painting.type}-${painting.number}.png',
+                                        fit: BoxFit.cover,
+                                        width: paintingSize,
+                                        height: paintingSize,
+                                      ),
+                                    ),
+
+                                    // AI vs human badge
+                                    Positioned(
+                                      bottom: 6,
+                                      right: 6,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 4,
+                                          horizontal: 8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: painting.type == "AI"
+                                              ? Colors.redAccent
+                                              : Colors.green.shade600,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          boxShadow: const [
+                                            BoxShadow(
+                                              color: Colors.black54,
+                                              offset: Offset(1, 1),
+                                              blurRadius: 3,
+                                            ),
+                                          ],
+                                        ),
+                                        child: Text(
+                                          painting.type == "AI"
+                                              ? "AI"
+                                              : "Human",
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
@@ -893,25 +990,26 @@ class _EndPageState extends State<EndPage>
                   },
                 ),
               ),
+
               const SizedBox(height: 20),
+
+              // result panel
               Container(
                 padding: const EdgeInsets.symmetric(
-                    vertical: 18, horizontal: 22),
+                  vertical: 18,
+                  horizontal: 22,
+                ),
                 margin: const EdgeInsets.symmetric(horizontal: 20),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF7E7C1),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: const Color(0xFF3C2F17),
-                    width: 3,
-                  ),
+                  border: Border.all(color: const Color(0xFF3C2F17), width: 3),
                   boxShadow: const [
                     BoxShadow(
                       color: Colors.brown,
                       offset: Offset(3, 3),
                       blurRadius: 6,
                     ),
-                    
                   ],
                   gradient: const LinearGradient(
                     colors: [
@@ -926,30 +1024,112 @@ class _EndPageState extends State<EndPage>
                 child: Text(
                   displayText,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: Colors.black,
                     height: 1.35,
-                  )
-                )
+                  ),
+                ),
               ),
-              SizedBox(height: 20),
+
+              const SizedBox(height: 20),
+
               ElevatedButton(
-                onPressed: () => [
-                  gameState.reset(),
+                onPressed: () {
+                  gameState.reset();
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(
-                        builder: (_) => const Home()),
-                  )                  
-                ],
+                    MaterialPageRoute(builder: (_) => const Home()),
+                  );
+                },
                 child: const Text("Play Again"),
               ),
-            ]
-          )
-        )
-      )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class ZoomPaintingPage extends StatelessWidget {
+  final Painting painting;
+
+  const ZoomPaintingPage({super.key, required this.painting});
+
+  @override
+  Widget build(BuildContext context) {
+    final Color labelColor = painting.type == "AI"
+        ? Colors.redAccent
+        : Colors.green.shade600;
+
+    final String typeLabel = painting.type == "AI"
+        ? "AI-Generated"
+        : "Human-Made";
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: InteractiveViewer(
+              minScale: 0.5,
+              maxScale: 4.0,
+              child: Center(
+                child: Image.asset(
+                  'assets/${painting.theme}-${painting.type}-${painting.number}.png',
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
+
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(18),
+            color: Colors.grey.shade900,
+            child: Column(
+              children: [
+                Text(
+                  painting.description,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    height: 1.4,
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 14,
+                  ),
+                  decoration: BoxDecoration(
+                    color: labelColor,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    typeLabel,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
