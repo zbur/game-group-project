@@ -1074,61 +1074,63 @@ class ZoomPaintingPage extends StatelessWidget {
         backgroundColor: Colors.black,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: InteractiveViewer(
-              minScale: 0.5,
-              maxScale: 4.0,
-              child: Center(
-                child: Image.asset(
-                  'assets/${painting.theme}-${painting.type}-${painting.number}.png',
-                  fit: BoxFit.contain,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: Center(
+                  child: Image.asset(
+                    'assets/${painting.theme}-${painting.type}-${painting.number}.png',
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
             ),
-          ),
-
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(18),
-            color: Colors.grey.shade900,
-            child: Column(
-              children: [
-                Text(
-                  painting.description,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                    height: 1.4,
-                  ),
-                ),
-
-                const SizedBox(height: 16),
-
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 14,
-                  ),
-                  decoration: BoxDecoration(
-                    color: labelColor,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    typeLabel,
+        
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              color: Colors.grey.shade900,
+              child: Column(
+                children: [
+                  Text(
+                    painting.description,
+                    textAlign: TextAlign.center,
                     style: const TextStyle(
+                      fontSize: 16,
                       color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
+                      height: 1.4,
                     ),
                   ),
-                ),
-              ],
+        
+                  const SizedBox(height: 16),
+        
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      color: labelColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      typeLabel,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
