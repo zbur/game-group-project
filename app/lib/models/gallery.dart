@@ -6,6 +6,18 @@ class Gallery {
   List<Painting> gallery = [];
 
   List<String> themes = ['Despair', 'Fantasy', 'Love', 'Nature', 'Religion', 'War'];
+  int _getThemeIndex(String theme) {
+    switch (theme) {
+      case 'Despair': return 0;
+      case 'Fantasy': return 1;
+      case 'Love': return 2;
+      case 'Nature': return 3;
+      case 'Religion': return 4;
+      case 'War': return 5;
+      default: return 0;
+    }
+  }
+
   List<Color> themeColors = [
     Color.fromARGB(255, 80, 105, 141), 
     Color.fromARGB(255, 141, 141, 59), 
@@ -22,11 +34,16 @@ class Gallery {
   ];
 
   void add(String theme, String type, int number) {
-    if(type == "AI") {
-      gallery.add(Painting(theme, type, number.toString(), descriptionsAI[themes.indexOf(theme)][number-1]));
+    int themeIndex = _getThemeIndex(theme);
+    String description;
+    
+    if (type == "AI") {
+      description = descriptionsAI[themeIndex][number - 1];
     } else {
-      gallery.add(Painting(theme, type, number.toString(), descriptionsReal[themes.indexOf(theme)][number-1]));
+      description = descriptionsReal[themeIndex][number - 1];
     }
+    
+    gallery.add(Painting(theme, type, number.toString(), description));
   }
 
   List<Painting> returnFiltered(String theme, String type) {
@@ -35,10 +52,15 @@ class Gallery {
   }
 
   Painting returnPainting(String theme, String type, int number) {
-    if(type == "AI") {
-      return Painting(theme, type, number.toString(), descriptionsAI[themes.indexOf(theme)][number-1]);
+    int themeIndex = _getThemeIndex(theme);
+    String description;
+    
+    if (type == "AI") {
+      description = descriptionsAI[themeIndex][number - 1];
     } else {
-      return Painting(theme, type, number.toString(), descriptionsReal[themes.indexOf(theme)][number-1]);
+      description = descriptionsReal[themeIndex][number - 1];
     }
+    
+    return Painting(theme, type, number.toString(), description);
   }
 }
